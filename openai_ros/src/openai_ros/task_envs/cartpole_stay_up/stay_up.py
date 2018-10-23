@@ -1,17 +1,17 @@
 from gym import utils
 from openai_ros.robot_envs import cartpole_env
-from gym.envs.registration import register
+#from gym.envs.registration import register
 from gym import error, spaces
 import rospy
 import math
 import numpy as np
 
-# The path is __init__.py of openai_ros, where we import the MovingCubeOneDiskWalkEnv directly
-register(
-        id='CartPoleStayUp-v0',
-        entry_point='openai_ros:task_envs.cartpole_stay_up.stay_up.CartPoleStayUpEnv',
-        timestep_limit=1000,
-    )
+# # The path is __init__.py of openai_ros, where we import the MovingCubeOneDiskWalkEnv directly
+# register(
+#         id='CartPoleStayUp-v0',
+#         entry_point='openai_ros:task_envs.cartpole_stay_up.stay_up.CartPoleStayUpEnv',
+#         timestep_limit=1000,
+#     )
 
 class CartPoleStayUpEnv(cartpole_env.CartPoleEnv):
     def __init__(self):

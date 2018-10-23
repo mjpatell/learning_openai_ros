@@ -2,7 +2,7 @@
 
 import rospy
 import time
-from controller_manager_msgs.srv import SwitchController, SwitchControllerRequest, SwitchControllerResponse
+from controller_manager_msgs.srv import SwitchController, SwitchControllerRequest, SwitchControllerResponse, ListControllers, ListControllersRequest, ListControllersResponse
 
 class ControllersConnection():
     
@@ -12,6 +12,13 @@ class ControllersConnection():
         self.controllers_list = controllers_list
         self.switch_service_name = '/'+namespace+'/controller_manager/switch_controller'
         self.switch_service = rospy.ServiceProxy(self.switch_service_name, SwitchController)
+
+        # controller list should not be empty, read list and name of controller from parameter server
+        if (len(self.controllers_list) is 0) or (len(controllers_list) is 0):
+            self.get_controller_list_service_name = '/'+namespace+'/controller_manager/list_controllers'
+            rospy.wait_for_service(self.get_controller_list_service_name)
+            self.get_list_service = rospy.ServiceProxy(self.get_controller_list_service_name, ListControllers)
+            self.get_controllers_list()
         rospy.logwarn("END Init ControllersConnection")
 
     def switch_controllers(self, controllers_on, controllers_off, strictness=1):
@@ -79,3 +86,22 @@ class ControllersConnection():
     def update_controllers_list(self, new_controllers_list):
 
         self.controllers_list = new_controllers_list
+
+    def get_controllers_list(self):
+        """
+        :return: get controller parameter from parameter server
+        """
+        response = self.get_list_service.call()
+
+        self.controllers_list = []
+        for cntroller in response.controller:
+            self.controllers_list.append(cntroller.name)
+
+        # rospy.logdebug("Number of controller: " + str(len(self.controllers_list)))
+        # rospy.logdebug("List of controller: ")
+        # for cnt_list in self.controllers_list:
+        #     rospy.logdebug(' - ' + str(cnt_list))
+        print("Number of controllers: " + str(len(self.controllers_list)))
+        print("List of controllers: ")
+        for cnt_list in self.controllers_list:
+            print(' - ' + str(cnt_list))
