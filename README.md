@@ -10,6 +10,14 @@ Execute the following commands:<br>
 
 
 ## Use
+Launch Gazebo model:<br>
+`roslaunch cartpole_description main.launch`<br>
+<br>
+Run cartpole-example: (Go to roscd cartpole_tests/script)<br>
+`python reinforcement_q_learning.py` <br>
+<br>
+make sure python version should be 3.7.0. To check python version<br>
+`python -V`
 
 
 
