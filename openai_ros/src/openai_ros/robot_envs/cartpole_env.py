@@ -2,23 +2,23 @@
 
 import gym
 import rospy
-import roslaunch
-import time
-import numpy as np
-from gym import utils, spaces
-from geometry_msgs.msg import Twist
-from std_srvs.srv import Empty
+# import roslaunch
+# import time
+# import numpy as np
+# from gym import utils, spaces
+# from geometry_msgs.msg import Twist
+# from std_srvs.srv import Empty
 from gym.utils import seeding
-from gym.envs.registration import register
-import copy
-import math
-import os
+# from gym.envs.registration import register
+# import copy
+# import math
+# import os
 
 from sensor_msgs.msg import JointState
-from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+# from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from std_msgs.msg import Float64
-from gazebo_msgs.srv import SetLinkState
-from gazebo_msgs.msg import LinkState
+# from gazebo_msgs.srv import SetLinkState
+# from gazebo_msgs.msg import LinkState
 from rosgraph_msgs.msg import Clock
 from openai_ros import robot_gazebo_env
 
@@ -26,15 +26,15 @@ class CartPoleEnv(robot_gazebo_env.RobotGazeboEnv):
     def __init__(
         self, control_type
     ):
-        
+        rospy.loginfo("Starting CartPoleEnv ...")
         self.publishers_array = []
         self._base_pub = rospy.Publisher('/cartpole_v0/foot_joint_velocity_controller/command', Float64, queue_size=1)
         self._pole_pub = rospy.Publisher('/cartpole_v0/pole_joint_velocity_controller/command', Float64, queue_size=1)
         self.publishers_array.append(self._base_pub)
         self.publishers_array.append(self._pole_pub)
-        
+
         rospy.Subscriber("/cartpole_v0/joint_states", JointState, self.joints_callback)
-        
+
         self.control_type = control_type
         if self.control_type == "velocity":
             self.controllers_list = ['joint_state_controller',
@@ -60,16 +60,17 @@ class CartPoleEnv(robot_gazebo_env.RobotGazeboEnv):
         # Seed the environment
         self._seed()
         self.steps_beyond_done = None
-        
+
         super(CartPoleEnv, self).__init__(
             controllers_list=self.controllers_list,
             robot_name_space=self.robot_name_space,
             reset_controls=self.reset_controls
             )
-        
+        rospy.loginfo("Ending CartPoleEnv ...")
 
     def joints_callback(self, data):
         self.joints = data
+        #print self.joints
 
     def _seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -114,6 +115,7 @@ class CartPoleEnv(robot_gazebo_env.RobotGazeboEnv):
         rospy.logdebug("All Publishers READY")
 
     def _check_all_systems_ready(self, init=True):
+
         self.base_position = None
         while self.base_position is None and not rospy.is_shutdown():
             try:
@@ -128,8 +130,9 @@ class CartPoleEnv(robot_gazebo_env.RobotGazeboEnv):
                     rospy.logdebug("Checking Init Values Ok=>" + str(base_data_ok))
             except:
                 rospy.logerr("Current cartpole_v0/joint_states not ready yet, retrying for getting joint_states")
+
         rospy.logdebug("ALL SYSTEMS READY")
-        
+
             
     def move_joints(self, joints_array):
         joint_value = Float64()
@@ -143,8 +146,8 @@ class CartPoleEnv(robot_gazebo_env.RobotGazeboEnv):
         while self.clock_time is None and not rospy.is_shutdown():
             try:
                 self.clock_time = rospy.wait_for_message("/clock", Clock, timeout=1.0)
-                rospy.logdebug("Current clock_time READY=>" + str(self.clock_time))
+                #rospy.logdebug("Current clock_time READY=>" + str(self.clock_time))
             except:
-                rospy.logdebug("Current clock_time not ready yet, retrying for getting Current clock_time")
+                pass
+                #rospy.logdebug("Current clock_time not ready yet, retrying for getting Current clock_time")
         return self.clock_time
-    

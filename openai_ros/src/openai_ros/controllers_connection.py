@@ -2,7 +2,7 @@
 
 import rospy
 import time
-from controller_manager_msgs.srv import SwitchController, SwitchControllerRequest, SwitchControllerResponse, ListControllers, ListControllersRequest, ListControllersResponse
+from controller_manager_msgs.srv import SwitchController, SwitchControllerRequest, SwitchControllerResponse, ListControllers
 
 class ControllersConnection():
     

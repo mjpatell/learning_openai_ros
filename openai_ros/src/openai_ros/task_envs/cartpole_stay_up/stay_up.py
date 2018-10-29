@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from gym import utils
 from openai_ros.robot_envs import cartpole_env
 #from gym.envs.registration import register
@@ -31,6 +33,9 @@ class CartPoleStayUpEnv(cartpole_env.CartPoleEnv):
             )
             
     def get_params(self):
+
+        print "Get Parameter From Parameter server..."
+
         #get configuration parameters
         self.n_actions = rospy.get_param('/cartpole_v0/n_actions')
         self.min_pole_angle = rospy.get_param('/cartpole_v0/min_pole_angle')
@@ -43,6 +48,19 @@ class CartPoleStayUpEnv(cartpole_env.CartPoleEnv):
         self.init_pos = rospy.get_param('/cartpole_v0/init_pos')
         self.wait_time = rospy.get_param('/cartpole_v0/wait_time')
         self.control_type = rospy.get_param('/cartpole_v0/control_type')
+
+        rospy.loginfo("n_action: " + str(self.n_actions))
+        rospy.loginfo("min_pole_angle: " + str(self.min_pole_angle))
+        rospy.loginfo("max_pole_angle: " + str(self.max_pole_angle))
+        rospy.loginfo("max_base_velocity: " + str(self.max_base_velocity))
+        rospy.loginfo("min_base_pose_x: " + str(self.min_base_pose_x))
+        rospy.loginfo("max_base_pose_x: " + str(self.max_base_pose_x))
+        rospy.loginfo("pos_step: " + str(self.pos_step))
+        rospy.loginfo("running_step: " + str(self.running_step))
+        rospy.loginfo("init_pos: " + str(self.init_pos))
+        rospy.loginfo("wait_time: " + str(self.wait_time))
+        rospy.loginfo("control_type: " + str(self.control_type))
+
         
     def _set_action(self, action):
         
@@ -59,14 +77,13 @@ class CartPoleStayUpEnv(cartpole_env.CartPoleEnv):
         elif action == 3: #RIGHT BIG
             rospy.loginfo("GO RIGHT BIG...")
             self.pos[0] += self.pos_step * 10
-            
-            
+
         # Apply action to simulation.
         rospy.loginfo("MOVING TO POS=="+str(self.pos))
 
         # 1st: unpause simulation
-        #rospy.logdebug("Unpause SIM...")
-        #self.gazebo.unpauseSim()
+        rospy.logdebug("Unpause SIM...")
+        self.gazebo.unpauseSim()
 
         self.move_joints(self.pos)
         rospy.logdebug("Wait for some time to execute movement, time="+str(self.running_step))
@@ -74,8 +91,8 @@ class CartPoleStayUpEnv(cartpole_env.CartPoleEnv):
         rospy.logdebug("DONE Wait for some time to execute movement, time=" + str(self.running_step))
 
         # 3rd: pause simulation
-        #rospy.logdebug("Pause SIM...")
-        #self.gazebo.pauseSim()
+        rospy.logdebug("Pause SIM...")
+        self.gazebo.pauseSim()
 
     def _get_obs(self):
         
@@ -92,6 +109,7 @@ class CartPoleStayUpEnv(cartpole_env.CartPoleEnv):
         
         rospy.loginfo("BASEPOSITION=="+str(observations[0]))
         rospy.loginfo("POLE ANGLE==" + str(observations[2]))
+
         if (self.min_base_pose_x >= observations[0] or observations[0] >= self.max_base_pose_x): #check if the base is still within the ranges of (-2, 2)
             rospy.logerr("Base Outside Limits==>min="+str(self.min_base_pose_x)+",pos="+str(observations[0])+",max="+str(self.max_base_pose_x))
             done = True
